@@ -6,7 +6,6 @@ export default function Game() {
     const [pickedNumbers, setPickedNumbers] = useState<number[]>([]);
     const [lastPickedNumber, setLastPickedNumber] = useState<number>(0);
     const [filteredNumbers, setFilteredNumbers] = useState<number[]>([]);
-    const [searchedNumber, setSearchNumber] = useState<number>();
     const [isAllNumbersPicked, setAllNumbersAsPicked] = useState<boolean>(false);
 
     const pickNumber = () => {
@@ -46,7 +45,6 @@ export default function Game() {
        
         
         if (number?.length === 0)  {
-            setSearchNumber(undefined);
             setFilteredNumbers(pickedNumbers);
         }
 
@@ -54,14 +52,11 @@ export default function Game() {
             return;
         }
 
-        let parsedNumber;
-
         // search number from list
         try {
-            parsedNumber = parseInt(number);
             setFilteredNumbers(filteredNumbers.filter((fn) => fn.toString().indexOf(number) != -1))
         } catch(error) {
-            console.log(number)
+            console.log(error);
             return;
         }
     }

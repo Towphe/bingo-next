@@ -6,13 +6,20 @@ import { useEffect, useState } from "react";
 // - scan results using QR for easy confirmation
 // - allow input where unnecessary numbers are allowed
 
+interface PatternMap {
+    blackout: string[];
+    cross: string[];
+    l: string[];
+    x: string[];
+}
+
 export default function Card() {
     // function that generates a valid bingo card
     const generateNumbers = () => {
-        let numbers = [];
+        const numbers = [];
         // iterate to every cell
         for (let i = 0; i < 5; i++) {
-        let temp = [];
+        const temp = [];
         for (let j = 0; j < 5; j++) {
             // generate num
             let num = (1 + j) * 15 - Math.floor(Math.random() * 15);
@@ -31,21 +38,6 @@ export default function Card() {
     
         // return flattened numbers
         return numbers.flat();
-    };
-    
-    const retrieveNumbers = () => {
-        // retrieve numbers from local storage
-        let nums = localStorage.getItem("numbers");
-    
-        // check if there are nums stored in local storage
-        if (nums === null) {
-            localStorage.setItem("numbers", JSON.stringify(generateNumbers()));
-        } else {
-        // treat retrieved nums
-        nums = JSON.parse(`[${nums}]`);
-        }
-    
-        return nums;
     };
 
     // function that creates a new bingo card
@@ -79,15 +71,7 @@ export default function Card() {
         "Blackout"
     ];
 
-    const colorMap:any = {
-        blue: "bg-blue-500",
-        purple: "bg-purple-500",
-        orange: "bg-orange-500",
-        red: "bg-red-500",
-        green: "bg-green-500"
-    };
-
-    const patternMap:any = {
+    const patternMap: PatternMap = {
         blackout: ["1111111111111111111111111"],
         cross: [
             "0010000100111110010000100"
@@ -137,11 +121,16 @@ export default function Card() {
                     }).toString().replaceAll(",","");
 
                     localStorage.setItem("currentStatus", currentStatus);
-
-                    if (patternMap[pattern].includes(currentStatus)) {
-                        setAsWinner(true);
-                    } else {
-                        setAsWinner(false);
+                    
+                    switch (pattern) {
+                        case "blackout":
+                            setAsWinner(patternMap.blackout.includes(currentStatus));
+                        case "cross":
+                            setAsWinner(patternMap.cross.includes(currentStatus));
+                        case "L":
+                            setAsWinner(patternMap.l.includes(currentStatus));
+                        case "X":
+                            setAsWinner(patternMap.x.includes(currentStatus));
                     }
                 } else {
                     const currentStatus = numberStatusMatrix.map((b,k) => {
@@ -176,12 +165,17 @@ export default function Card() {
         setAsWinner(false);
         setPattern(inputPattern);
         
-        const currentStatus = numberStatusMatrix.map((b,k) => b ? "1" : "0").toString().replaceAll(",","");
+        const currentStatus = numberStatusMatrix.map((b) => b ? "1" : "0").toString().replaceAll(",","");
 
-        if (patternMap[inputPattern].includes(currentStatus)) {
-            setAsWinner(true);
-        } else {
-            setAsWinner(false);
+        switch (pattern) {
+            case "blackout":
+                setAsWinner(patternMap.blackout.includes(currentStatus));
+            case "cross":
+                setAsWinner(patternMap.cross.includes(currentStatus));
+            case "L":
+                setAsWinner(patternMap.l.includes(currentStatus));
+            case "X":
+                setAsWinner(patternMap.x.includes(currentStatus));
         }
 
         // save to local storage
@@ -193,6 +187,23 @@ export default function Card() {
 
         // save to local storage
         localStorage.setItem("savedColor", inputColor);
+    }
+
+    const getColorCSS = () => {
+        switch (color) {
+            case "blue":
+                return "bg-blue-500"
+            case "purple":
+                return "bg-purple-500";
+            case "orange":
+                return "bg-orange-500";
+            case "red":
+                return "bg-red-500";
+            case "green":
+                return "bg-green-500";
+            default: 
+                return "bg-blue-500";
+        }
     }
 
     return (
@@ -213,7 +224,7 @@ export default function Card() {
             <div className="w-4/5 sm:w-3/5 md:w-1/2 lg:w-2/5 xl:w-1/3 2xl:w-1/4 grid grid-rows-5 grid-cols-5 text-center bg-[#F2F2F2] text-[#333333] rounded-md">
                 {
                     numbers.map((n, i) => (
-                        <button onClick={() => i === 12 ? console.log("") : toggleNumber(n, i)} className={`block text-2xl px-2 py-4 ${numberStatusMatrix[i] == true ? `text-[#f2f2f2] font-semibold ${colorMap[color]}` : ""}`} key={i}>
+                        <button onClick={() => i === 12 ? console.log("") : toggleNumber(n, i)} className={`block text-2xl px-2 py-4 ${numberStatusMatrix[i] == true ? `text-[#f2f2f2] font-semibold ${getColorCSS()}` : ""}`} key={i}>
                             {i === 12 ? "FREE" : n}
                         </button>
                     ))
